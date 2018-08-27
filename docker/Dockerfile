@@ -1,5 +1,7 @@
 FROM registry.access.redhat.com/rhel7:7.5
 
-RUN yum repolist all && \
-    yum intall --disablerepo="*" --enablerepo=rhel-7-server-rpms --enablerepo=rhel-server-rhscl-7-rpms -y yum-utils certbot
+RUN curl -sfL https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm -o /tmp/epel-release-latest-7.noarch.rpm && \
+    sudo yum install /tmp/epel-release-latest-7.noarch.rpm && rm -rf /tmp/epel-release-latest-7.noarch.rpm && \
+    yum repolist all && \
+    yum install --disablerepo="*" '--enablerepo=rhel-7-server-rpms' '--enablerepo=rhel-server-rhscl-7-rpms' '--enablerepo=rhel-7-server-extras-rpms' '--enablerepo=epel' -y yum-utils certbot
     
