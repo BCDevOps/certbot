@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Template
+metadata: {}
+parameters:
+  - name: 'EMAIL'
+    required: true
+objects:
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    labels:
+      app: certbot
+    creationTimestamp: null
+    name: certbot
+- apiVersion: v1
+  groupNames: null
+  kind: RoleBinding
+  metadata:
+    labels:
+      app: certbot
+    creationTimestamp: null
+    name: certbot_edit
+  roleRef:
+    name: edit
+  subjects:
+  - kind: ServiceAccount
+    name: certbot
+#PVC
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      volume.beta.kubernetes.io/storage-class: gluster-file
+      volume.beta.kubernetes.io/storage-provisioner: kubernetes.io/glusterfs
+    labels:
+      app: certbot
+    creationTimestamp: null
+    name: certbot
+  spec:
+    storageClassName: gluster-file
+    accessModes:
+      - ReadWriteMany
+    resources:
+      requests:
+        storage: 1Gi
+  status: {}
+#CROBJOB
+- apiVersion: batch/v1beta1
+  kind: CronJob
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: certbot
+    name: certbot
+  spec:
+    concurrencyPolicy: Replace
+    failedJobsHistoryLimit: 3
+    successfulJobsHistoryLimit: 3
+    startingDeadlineSeconds: 60
+    jobTemplate:
+      metadata:
+        creationTimestamp: null
+      spec:
+        backoffLimit: 6
+        activeDeadlineSeconds: 60
+        parallelism: 1
+        completions: 1
+        template:
+          metadata:
+            creationTimestamp: null
+            labels:
+              certbot: "true"
+          spec:
+            containers:
+            - name: certbot
+              image: docker-registry.default.svc:5000/bcgov/certbot:v1-stable
+              imagePullPolicy: Always
+              env:
+                - name: CERTBOT_EMAIL
+                  value: '$EMAIL'
+              resources:
+                requests:
+                  cpu: 100m
+                limits:
+                  cpu: 200m
+              volumeMounts:
+                - mountPath: /etc/letsencrypt
+                  name: certbot-config
+            restartPolicy: Never
+            serviceAccountName: certbot
+            volumes:
+              - name: certbot-config
+                persistentVolumeClaim:
+                  claimName: certbot
+    schedule: '* */6 * * *'
+  status: {}
+#end cron job
