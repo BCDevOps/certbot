@@ -5,7 +5,7 @@
 : "${CERTBOT_WORK_DIR:=/var/lib/letsencrypt}"
 : "${CERTBOT_RSA_KEY_SIZE:=2048}"
 
-[ ! -z "$CERTBOT_EMAIL" ] || (echo "Missing 'CERTBOT_EMAIL' environment variable" && exit 1)
+if [ -z "$CERTBOT_EMAIL" ]; then echo "Missing 'CERTBOT_EMAIL' environment variable" && exit 1; fi
 
 mkdir -p "$CERTBOT_CONFIG_DIR" "$CERTBOT_WORK_DIR" "$CERTBOT_LOGS_DIR"
 
