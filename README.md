@@ -23,3 +23,4 @@ When a cert is created/renewed, apply the new certificate to the related routes
 - https://letsencrypt.org/how-it-works/
 - https://certbot.eff.org/
 - https://github.com/certbot/certbot/issues/2697#issuecomment-242360098
+- https://www.entrust.net/knowledge-base/technote.cfm?tn=70882
