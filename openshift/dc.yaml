@@ -4,6 +4,8 @@ metadata: {}
 parameters:
   - name: 'EMAIL'
     required: true
+  - name: 'IMAGE'
+    required: true
 objects:
 - apiVersion: v1
   kind: ServiceAccount
@@ -62,22 +64,22 @@ objects:
         creationTimestamp: null
       spec:
         backoffLimit: 6
-        activeDeadlineSeconds: 60
+        activeDeadlineSeconds: 300
         parallelism: 1
         completions: 1
         template:
           metadata:
             creationTimestamp: null
             labels:
-              certbot: "true"
+              app: certbot
           spec:
             containers:
             - name: certbot
-              image: docker-registry.default.svc:5000/bcgov/certbot:v1-stable
+              image: ${IMAGE}
               imagePullPolicy: Always
               env:
                 - name: CERTBOT_EMAIL
-                  value: '$EMAIL'
+                  value: '${EMAIL}'
               resources:
                 requests:
                   cpu: 100m
