@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 : "${CERTBOT_CONFIG_DIR:=/etc/letsencrypt}"
-: "${CERTBOT_LOGS_DIR:=/var/logs/letsencrypt}"
+: "${CERTBOT_LOGS_DIR:=/var/log/letsencrypt}"
 : "${CERTBOT_WORK_DIR:=/var/lib/letsencrypt}"
 : "${CERTBOT_RSA_KEY_SIZE:=2048}"
 
