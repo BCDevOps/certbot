@@ -28,8 +28,7 @@ Provide a way for automatically update TLS Certificates on OpenShift Routes
 1. (Optional) If you need to run the CronJob for one time, you can do that by running:
   ```
   #Delete any previous Job created
-  oc delete job/certbot-manual
-  oc get cronjob/certbot -o json | jq '{"apiVersion": "batch/v1", "kind": "Job", "metadata": {"name": "\(.metadata.name)-manual", "labels": .metadata.labels},"spec": .spec.jobTemplate.spec}' | oc create -f -
+  oc create job certbot-manual-0 --from=cronjob/certbot
   ```
 
 # References
