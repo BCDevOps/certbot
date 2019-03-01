@@ -4,6 +4,7 @@
 : "${CERTBOT_LOGS_DIR:=/var/log/letsencrypt}"
 : "${CERTBOT_WORK_DIR:=/var/lib/letsencrypt}"
 : "${CERTBOT_RSA_KEY_SIZE:=2048}"
+: "${CERTBOT_DELETE_ACME_ROUTES:=true}"
 
 if [ -z "$CERTBOT_EMAIL" ]; then echo "Missing 'CERTBOT_EMAIL' environment variable" && exit 1; fi
 
@@ -123,5 +124,7 @@ CABUNDLE=$(awk '{printf "%s\\n", $0}' $CERTBOT_CONFIG_DIR/live/openshift-route-c
 cat /tmp/certbot-routes.txt | xargs -n 1 -I {} oc patch "route/{}" -p '{"spec":{"tls":{"certificate":"'"${CERTIFICATE}"'","key":"'"${KEY}"'","caCertificate":"'"${CABUNDLE}"'"}}}'
 #fi
 
-# Delete well-known/acme-challenge routes
-oc delete route,svc -l app=certbot,well-known=acme-challenge
+if [ "${CERTBOT_DELETE_ACME_ROUTES}" == "true" ]; then
+  # Delete well-known/acme-challenge routes
+  oc delete route,svc -l app=certbot,well-known=acme-challenge
+fi
