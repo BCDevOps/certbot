@@ -23,6 +23,10 @@ work-dir = $CERTBOT_WORK_DIR
 logs-dir = $CERTBOT_LOGS_DIR
 EOF
 
+if [ ! -z "$CERTBOT_STAGING" ]; then
+  echo "staging = true" >> /tmp/certbot.ini
+fi
+
 cat > $CERTBOT_CONFIG_DIR/renewal-hooks/deploy/set-deployed-flag.sh << EOF
 #!/bin/sh
 touch $CERTBOT_WORK_DIR/deployed
@@ -101,8 +105,8 @@ oc create -f /tmp/certbot-svc.yaml
 cat /tmp/certbot-hosts.txt | xargs -n 1 -I {} oc process -f /tmp/certbot-route.yaml -p 'NAME=acme-challenge-{}' -p 'HOST={}' | oc create -f -
 
 rm -f $CERTBOT_WORK_DIR/deployed
-certbot -c /tmp/certbot.ini certonly --no-eff-email --keep --cert-name 'openshift-route-certs' --expand --standalone -d "$(</tmp/certbot-hosts.csv)"
-certbot -c /tmp/certbot.ini renew --no-eff-email --cert-name 'openshift-route-certs'
+certbot -c /tmp/certbot.ini certonly --no-random-sleep --no-eff-email --keep --cert-name 'openshift-route-certs' --expand --standalone -d "$(</tmp/certbot-hosts.csv)"
+certbot -c /tmp/certbot.ini renew --no-random-sleep --no-eff-email --cert-name 'openshift-route-certs'
 
 if [ -f $CERTBOT_WORK_DIR/deployed ]; then
   echo 'New certificate(s) have been issued'
