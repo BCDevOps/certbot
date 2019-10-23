@@ -1,9 +1,9 @@
 # cat Dockerfile | oc new-build -D - --name=certbot
-FROM registry.access.redhat.com/rhel7:7.6-151
+FROM registry.access.redhat.com/rhel7:7.7-348
 
 RUN set -x && \
     yum install -y https://mirror.csclub.uwaterloo.ca/fedora/epel/epel-release-latest-7.noarch.rpm && \
-    yum install --disablerepo="*" '--enablerepo=rhel-7-server-rpms' '--enablerepo=rhel-server-rhscl-7-rpms' '--enablerepo=rhel-7-server-extras-rpms' '--enablerepo=epel' '--enablerepo=rhel-7-server-optional-rpms' -y yum-utils certbot && \
+    yum install --disablerepo="*" '--enablerepo=rhel-7-server-rpms' '--enablerepo=rhel-server-rhscl-7-rpms' '--enablerepo=rhel-7-server-extras-rpms' '--enablerepo=epel' '--enablerepo=rhel-7-server-optional-rpms' -y yum-utils certbot-0.39.0-1.el7 && \
     mkdir -p /var/log/letsencrypt && \
     chgrp -R 0 /var/log/letsencrypt && \
     chmod -R ugo+rwX /var/log/letsencrypt && \

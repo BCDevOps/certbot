@@ -50,7 +50,7 @@ spec:
       protocol: TCP
       targetPort: 8080
   selector:
-    certbot: "true"
+    app: certbot
   sessionAffinity: None
   type: ClusterIP
 EOF
@@ -107,7 +107,7 @@ cat /tmp/certbot-hosts.txt | xargs -n 1 -I {} oc process -f /tmp/certbot-route.y
 
 rm -f $CERTBOT_WORK_DIR/deployed
 certbot -c /tmp/certbot.ini certonly --no-random-sleep --no-eff-email --keep --cert-name 'openshift-route-certs' --expand --standalone -d "$(</tmp/certbot-hosts.csv)"
-certbot -c /tmp/certbot.ini renew --no-random-sleep --no-eff-email --cert-name 'openshift-route-certs'
+certbot -c /tmp/certbot.ini renew --no-random-sleep --no-random-sleep-on-renew --no-eff-email --cert-name 'openshift-route-certs'
 
 if [ -f $CERTBOT_WORK_DIR/deployed ]; then
   echo 'New certificate(s) have been issued'
