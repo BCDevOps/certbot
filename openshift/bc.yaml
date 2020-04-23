@@ -16,13 +16,13 @@ items:
       local: false
     tags:
     - annotations:
-        openshift.io/imported-from: registry.access.redhat.com/rhel7:7.6-151
+        openshift.io/imported-from: registry.access.redhat.com/rhel7:7.8-265
       from:
         kind: DockerImage
-        name: registry.access.redhat.com/rhel7:7.6-151
+        name: registry.access.redhat.com/rhel7:7.8-265
       generation: null
       importPolicy: {}
-      name: 7.6-151
+      name: 7.8-265
       referencePolicy:
         type: ""
   status:
@@ -66,13 +66,13 @@ items:
     source:
       contextDir: docker
       git:
-        uri: https://github.com/cvarjao/rhel-certbot.git
+        uri: https://github.com/BCDevOps/certbot.git
       type: Git
     strategy:
       dockerStrategy:
         from:
           kind: ImageStreamTag
-          name: rhel7:7.6-151
+          name: rhel7:7.8-265
       type: Docker
     triggers:
     - type: ConfigChange
