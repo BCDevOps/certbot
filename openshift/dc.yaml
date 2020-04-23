@@ -6,6 +6,16 @@ parameters:
     required: true
   - name: 'IMAGE'
     required: true
+  - name: 'DEBUG'
+    required: false
+    value: "false"
+  - name: 'DELETE_ACME_ROUTES'
+    required: false
+    value: "true"
+  - name: 'CERTBOT_STAGING'
+    required: false
+    value: "false"
+
 objects:
 - apiVersion: v1
   kind: ServiceAccount
@@ -31,15 +41,12 @@ objects:
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
-    annotations:
-      volume.beta.kubernetes.io/storage-class: gluster-file
-      volume.beta.kubernetes.io/storage-provisioner: kubernetes.io/glusterfs
     labels:
       app: certbot
     creationTimestamp: null
     name: certbot
   spec:
-    storageClassName: gluster-file
+    storageClassName: netapp-file-standard
     accessModes:
       - ReadWriteMany
     resources:
@@ -80,6 +87,12 @@ objects:
               env:
                 - name: CERTBOT_EMAIL
                   value: '${EMAIL}'
+                - name: CERTBOT_DEBUG
+                  value: '${DEBUG}'
+                - name: CERTBOT_DELETE_ACME_ROUTES
+                  value: '${DELETE_ACME_ROUTES}'                                    
+                - name: CERTBOT_STAGING
+                  value: '${CERTBOT_STAGING}'  
               resources:
                 requests:
                   cpu: 100m
@@ -94,7 +107,7 @@ objects:
               - name: certbot-config
                 persistentVolumeClaim:
                   claimName: certbot
-    # https://crontab.guru/every-6-hours
+    # https://crontab.guru/every-6-hours                  
     schedule: '0 */6 * * *'
   status: {}
 #end cron job

@@ -21,18 +21,43 @@ Provide a way for automatically update TLS Certificates on OpenShift Routes
     oc apply -f openshift/bc.yaml
     ```
 1. Install `openshift/dc.yaml` (Template) to create the CronJob and supporting objects (ServiceAccount, RoleBinding, PVC, etc.).
+   For non-prod environments you can set `CERTBOT_STAGING=true`, so you don't hit any service limits at Let's Encrypt.
     ```
-    oc process -f openshift/dc.yaml -p 'EMAIL=some@email.com' -p "IMAGE=$(oc get is/certbot '--output=jsonpath={.status.dockerImageRepository}:latest')" | oc apply -f - --record=false --overwrite=true
+    oc process -f openshift/dc.yaml -p 'EMAIL=some@email.com' -p "IMAGE=$(oc get is/certbot '--output=jsonpath={.status.dockerImageRepository}:latest')" -p 'CERTBOT_STAGING=false'| oc apply -f - --record=false --overwrite=true
     ```
-    PS: You MUST set/use a valid e-mail
+    PS: You MUST set/use a valid e-mail    
 1. (Optional) If you need to run the CronJob for one time, you can do that by running:
-  ```
-  # Delete any previous manual Job created
-  oc get job -o name | grep -F -e '-manual-' | xargs oc delete
+    ```
+    # Delete any previous manual Job created
+    oc get job -o name | grep -F -e '-manual-' | xargs oc delete
+    Note: When there are no jobs to delete, you will get an error for oc delete.
 
-  # Create a Job
-  oc create job "certbot-manual-$(date +%s)" --from=cronjob/certbot
-  ```
+    # Create a Job
+    oc create job "certbot-manual-$(date +%s)" --from=cronjob/certbot
+    ```
+
+# Tips
+1. If you are going to setup automatic cert renewals for the first time, backup "Certficate", "Private Key" and "CA Certificate" contents from your route.
+1. List your cron jobs
+    ```
+    oc get cronjob
+    ```
+1. To describe your cron job
+    ```
+    oc describe cronjob/certbot
+    ```
+1. To see your cron jobs in Openshift GUI: Resources > Other Resources> Job
+1. To access the logs for cron jobs in Openshift GUI: Monitoring > Uncheck "Hide older resources". You will see recently terminated certbot that would have terminated based on your schedule.
+1. If you are seeing errors in the logs and need to troubleshoot, you can use optional parameters DEBUG and DELETE_ACME_ROUTES.
+    ```
+    oc process -f openshift/dc.yaml -p 'EMAIL=some@email.com' -p "IMAGE=$(oc get is/certbot '--output=jsonpath={.status.dockerImageRepository}:latest')" -p 'CERTBOT_STAGING=false' -p 'DEBUG=true' -p 'DELETE_ACME_ROUTES=false' | oc apply -f - --record=false --overwrite=true
+    ```
+    PS: Ensure that you manually delete the ACME Route and Service after you are done troubleshooting and redeploy without the DEBUG and DELETE_ACME_ROUTES options.
+1. If you end up running the setup process multiple times, ensure that you have deleted all the duplicate copies of those cron jobs and only keep the latest one. Or to delete all the certbot jobs and start fresh you can use the below. 
+    ```
+    oc get job -o name | grep -F -e 'certbot' | xargs oc delete
+    oc get cronjob -o name | grep -F -e 'certbot' | xargs oc delete
+    ```
 
 # References
 - https://certbot.eff.org/docs/using.html#webroot
