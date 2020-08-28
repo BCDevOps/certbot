@@ -19,7 +19,7 @@ Provide a way for automatically update TLS Certificates on OpenShift Routes
 1. Point to appropriate namespace (usually tools)
 1. Install `openshift/certbot.bc.yaml` to create the required build objects.
    ```
-    oc apply -f openshift/certbot.bc.yaml
+    oc process -f Openshift/certbot.bc.yaml | oc apply -f -
     ```
 1. Install `openshift/certbot.dc.yaml` (Template) to create the CronJob and supporting objects (ServiceAccount, RoleBinding, PVC, etc.).
    For non-prod environments you can set `CERTBOT_STAGING=true`, so you don't hit any service limits at Let's Encrypt.
