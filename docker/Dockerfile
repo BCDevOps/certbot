@@ -3,7 +3,7 @@ FROM registry.access.redhat.com/rhel7:7.8-265
 
 RUN set -x && \
     yum install -y '--setopt=skip_missing_names_on_install=False' '--setopt=skip_missing_names_on_update=False' https://mirror.csclub.uwaterloo.ca/fedora/epel/epel-release-latest-7.noarch.rpm && \
-    yum install '--setopt=skip_missing_names_on_install=False' '--setopt=skip_missing_names_on_update=False' '--disablerepo=*' '--enablerepo=rhel-7-server-rpms' '--enablerepo=rhel-server-rhscl-7-rpms' '--enablerepo=epel' '--enablerepo=rhel-7-server-optional-rpms' -y yum-utils certbot-1.6.0-1.el7 && \
+    yum install '--setopt=skip_missing_names_on_install=False' '--setopt=skip_missing_names_on_update=False' '--disablerepo=*' '--enablerepo=rhel-7-server-rpms' '--enablerepo=rhel-server-rhscl-7-rpms' '--enablerepo=epel' '--enablerepo=rhel-7-server-optional-rpms' -y yum-utils certbot-1.3.0-1.el7 && \
     mkdir -p /var/log/letsencrypt && \
     chgrp -R 0 /var/log/letsencrypt && \
     chmod -R ugo+rwX /var/log/letsencrypt && \
