@@ -2,11 +2,8 @@
 FROM registry.access.redhat.com/rhel7:7.8-265
 
 RUN set -x && \
-    yum-config-manager --save --setopt=skip_missing_names_on_install=False && \
-    yum-config-manager --save --setopt=skip_missing_names_on_update=False && \
-    yum-config-manager --save --setopt=rhel-7-server-extras-rpms.skip_if_unavailable=true &&\
-    yum install -y https://mirror.csclub.uwaterloo.ca/fedora/epel/epel-release-latest-7.noarch.rpm && \
-    yum install --disablerepo="*" '--enablerepo=rhel-7-server-rpms' '--enablerepo=rhel-server-rhscl-7-rpms' '--enablerepo=rhel-7-server-extras-rpms' '--enablerepo=epel' '--enablerepo=rhel-7-server-optional-rpms' -y yum-utils certbot-1.6.0-1.el7 && \
+    yum install -y '--setopt=skip_missing_names_on_install=False' '--setopt=skip_missing_names_on_update=False' https://mirror.csclub.uwaterloo.ca/fedora/epel/epel-release-latest-7.noarch.rpm && \
+    yum install '--setopt=skip_missing_names_on_install=False' '--setopt=skip_missing_names_on_update=False' '--disablerepo=*' '--enablerepo=rhel-7-server-rpms' '--enablerepo=rhel-server-rhscl-7-rpms' '--enablerepo=epel' '--enablerepo=rhel-7-server-optional-rpms' -y yum-utils certbot-1.6.0-1.el7 && \
     mkdir -p /var/log/letsencrypt && \
     chgrp -R 0 /var/log/letsencrypt && \
     chmod -R ugo+rwX /var/log/letsencrypt && \
@@ -19,10 +16,7 @@ RUN set -x && \
     yum clean all -y
 
 RUN set -x && \
-    yum-config-manager --save --setopt=skip_missing_names_on_install=False && \
-    yum-config-manager --save --setopt=skip_missing_names_on_update=False && \
-    yum-config-manager --save --setopt=rhel-7-server-extras-rpms.skip_if_unavailable=true &&\
-    yum install '--disablerepo=*' '--enablerepo=rhel-7-server-rpms' '--enablerepo=rhel-server-rhscl-7-rpms' '--enablerepo=rhel-7-server-extras-rpms' '--enablerepo=epel' '--enablerepo=rhel-7-server-optional-rpms' '--enablerepo=rhel-7-server-ose-3.11-rpms' -y jq && \
+    yum install '--setopt=skip_missing_names_on_install=False' '--setopt=skip_missing_names_on_update=False' '--disablerepo=*' '--enablerepo=rhel-7-server-rpms' '--enablerepo=rhel-server-rhscl-7-rpms' '--enablerepo=epel' '--enablerepo=rhel-7-server-optional-rpms' '--enablerepo=rhel-7-server-ose-3.11-rpms' -y jq && \
     curl -sfL https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz -o /tmp/openshift-origin-client-tools.tar.gz && \
     tar -xzvf /tmp/openshift-origin-client-tools.tar.gz -C /usr/local/bin --strip-components=1 openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit/oc && \
     rm /tmp/openshift-origin-client-tools.tar.gz && \
