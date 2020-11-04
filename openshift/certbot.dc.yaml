@@ -16,6 +16,9 @@ parameters:
   - name: 'CERTBOT_SUSPEND_CRON'
     required: false
     value: "false"
+  - name: 'DRYRUN'
+    required: false
+    value: "false"
   - name: 'DEBUG'
     required: false
     value: "false"
@@ -108,9 +111,11 @@ objects:
                 - name: CERTBOT_DEBUG
                   value: '${DEBUG}'
                 - name: CERTBOT_DELETE_ACME_ROUTES
-                  value: '${DELETE_ACME_ROUTES}'                                    
+                  value: '${DELETE_ACME_ROUTES}'
                 - name: CERTBOT_STAGING
-                  value: '${CERTBOT_STAGING}'  
+                  value: '${CERTBOT_STAGING}'
+                - name: CERTBOT_DRY_RUN
+                  value: '${DRYRUN}'
               resources:
                 requests:
                   cpu: 100m

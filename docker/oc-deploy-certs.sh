@@ -5,6 +5,10 @@
 : "${CERTBOT_WORK_DIR:=/var/lib/letsencrypt}"
 : "${CERTBOT_DEPLOY_DIR:=/etc/letsencrypt/renewal-hooks/deploy}"
 : "${CERTBOT_RSA_KEY_SIZE:=2048}"
+: "${CERTBOT_DELETE_ACME_ROUTES:=true}"
+: "${CERTBOT_DEBUG:=false}"
+: "${CERTBOT_STAGING:=false}"
+: "${CERTBOT_DRY_RUN:=false}"
 
 if [ -z "$CERTBOT_EMAIL" ]; then echo "Missing 'CERTBOT_EMAIL' environment variable" && exit 1; fi
 
@@ -128,8 +132,17 @@ cat /tmp/certbot-hosts.txt | xargs -n 1 -I {} oc process -f /tmp/certbot-route.y
 sleep 5s
 
 rm -f $CERTBOT_WORK_DIR/deployed
-certbot --config /tmp/certbot.ini certonly --no-random-sleep --no-eff-email --keep-until-expiring --cert-name 'openshift-route-certs' --expand --standalone -d "$(</tmp/certbot-hosts.csv)" --debug
-certbot --config /tmp/certbot.ini renew --no-random-sleep --no-random-sleep-on-renew --no-eff-email --cert-name 'openshift-route-certs' --debug
+CERTBOT_ARGS='--no-random-sleep --no-eff-email -debug'
+if [ "${CERTBOT_DRY_RUN}" == "true" ]; then
+  CERTBOT_ARGS="${CERTBOT_ARGS} --dry-run"
+fi
+
+certbot --config /tmp/certbot.ini certonly $CERTBOT_ARGS --keep-until-expiring --cert-name 'openshift-route-certs' --expand --standalone -d "$(</tmp/certbot-hosts.csv)"
+certbot --config /tmp/certbot.ini renew $CERTBOT_ARGS --no-random-sleep-on-renew --cert-name 'openshift-route-certs'
+
+if [ "${CERTBOT_DRY_RUN}" == "true" ]; then
+  exit 0
+fi
 
 if [ -f $CERTBOT_WORK_DIR/deployed ]; then
   echo 'New certificate(s) have been issued'
