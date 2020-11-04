@@ -132,7 +132,7 @@ cat /tmp/certbot-hosts.txt | xargs -n 1 -I {} oc process -f /tmp/certbot-route.y
 sleep 5s
 
 rm -f $CERTBOT_WORK_DIR/deployed
-CERTBOT_ARGS='--no-random-sleep --no-eff-email -debug'
+CERTBOT_ARGS='--no-random-sleep --no-eff-email --debug'
 if [ "${CERTBOT_DRY_RUN}" == "true" ]; then
   CERTBOT_ARGS="${CERTBOT_ARGS} --dry-run"
 fi
