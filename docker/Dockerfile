@@ -23,5 +23,6 @@ RUN set -x && \
     yum clean all -y
 
 COPY oc-deploy-certs.sh /usr/local/bin/oc-deploy-certs.sh
+RUN chmod g+w /usr/local/bin/oc-deploy-certs.sh
 
 ENTRYPOINT ["/usr/local/bin/oc-deploy-certs.sh"]
