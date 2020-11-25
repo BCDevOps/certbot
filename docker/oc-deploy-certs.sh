@@ -132,13 +132,22 @@ cat /tmp/certbot-hosts.txt | xargs -n 1 -I {} oc process -f /tmp/certbot-route.y
 sleep 5s
 
 rm -f $CERTBOT_WORK_DIR/deployed
-CERTBOT_ARGS='--no-random-sleep --no-eff-email --debug'
+CERTBOT_ARGS='--no-random-sleep --no-eff-email'
 if [ "${CERTBOT_DRY_RUN}" == "true" ]; then
   CERTBOT_ARGS="${CERTBOT_ARGS} --dry-run"
 fi
 
+if [ "${CERTBOT_DEBUG}" == "true" ]; then
+  CERTBOT_ARGS="${CERTBOT_ARGS} --debug"
+fi
+
+if [ ! -z "$CERTBOT_SERVER" ]; then
+  CERTBOT_ARGS="${CERTBOT_ARGS} --server '${CERTBOT_SERVER}'"
+fi
+
 set -x
 certbot --config /tmp/certbot.ini certonly $CERTBOT_ARGS --keep-until-expiring --cert-name 'openshift-route-certs' --expand --standalone -d "$(</tmp/certbot-hosts.csv)"
+#certbot --config /tmp/certbot.ini certonly $CERTBOT_ARGS --keep-until-expiring --cert-name 'openshift-route-certs' --expand --standalone --csr /tmp/cert.csr.pem
 certbot --config /tmp/certbot.ini renew $CERTBOT_ARGS --no-random-sleep-on-renew --cert-name 'openshift-route-certs'
 set +x
 
