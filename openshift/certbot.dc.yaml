@@ -16,6 +16,10 @@ parameters:
   - name: 'CERTBOT_SUSPEND_CRON'
     required: false
     value: "false"
+  - name: 'CERTBOT_SERVER'
+    required: true
+    value: "https://acme-v02.api.letsencrypt.org/directory"
+    # staging Server: https://acme-staging-v02.api.letsencrypt.org/directory
   - name: 'DRYRUN'
     required: false
     value: "false"
@@ -116,6 +120,8 @@ objects:
                   value: '${CERTBOT_STAGING}'
                 - name: CERTBOT_DRY_RUN
                   value: '${DRYRUN}'
+                - name: CERTBOT_SERVER
+                  value: '${CERTBOT_SERVER}'
               resources:
                 requests:
                   cpu: 100m

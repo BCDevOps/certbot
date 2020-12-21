@@ -3,33 +3,10 @@ kind: Template
 metadata: 
   creationTimestamp: null
   name: certbot
-
+parameters:
+- name: GIT_REF
+  value: 'master'
 objects:
-- apiVersion: v1
-  kind: ImageStream
-  metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewBuild
-    creationTimestamp: null
-    labels:
-      build: certbot
-    name: rhel7
-  spec:
-    lookupPolicy:
-      local: false
-    tags:
-    - annotations:
-        openshift.io/imported-from: registry.access.redhat.com/rhel7:7.8-265
-      from:
-        kind: DockerImage
-        name: registry.access.redhat.com/rhel7:7.8-265
-      generation: null
-      importPolicy: {}
-      name: 7.8-265
-      referencePolicy:
-        type: ""
-  status:
-    dockerImageRepository: ""
 - apiVersion: v1
   kind: ImageStream
   metadata:
@@ -70,12 +47,10 @@ objects:
       contextDir: docker
       git:
         uri: https://github.com/BCDevOps/certbot.git
+        ref: '${GIT_REF}'
       type: Git
     strategy:
-      dockerStrategy:
-        from:
-          kind: ImageStreamTag
-          name: rhel7:7.8-265
+      dockerStrategy: { }
       type: Docker
     triggers:
     - type: ConfigChange

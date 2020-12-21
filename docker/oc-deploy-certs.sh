@@ -142,7 +142,7 @@ if [ "${CERTBOT_DEBUG}" == "true" ]; then
 fi
 
 if [ ! -z "$CERTBOT_SERVER" ]; then
-  CERTBOT_ARGS="${CERTBOT_ARGS} --server '${CERTBOT_SERVER}'"
+  CERTBOT_ARGS="${CERTBOT_ARGS} --server ${CERTBOT_SERVER}"
 fi
 
 set -x
