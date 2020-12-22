@@ -169,7 +169,7 @@ CABUNDLE=$(awk '{printf "%s\\n", $0}' $CERTBOT_CONFIG_DIR/live/openshift-route-c
 
 # If any of the cert components is blank, then don't run the patch command
 if [ "${CERTIFICATE}" == "" ] || [ "${KEY}" == "" ] || [ "${CABUNDLE}" == "" ]; then
-  echo "Certs weren't created properley and no routes were patched."
+  echo "Certs weren't created properly and no routes were patched."
 else
   cat /tmp/certbot-routes.txt | xargs -n 1 -I {} oc patch "route/{}" -p '{"spec":{"tls":{"certificate":"'"${CERTIFICATE}"'","key":"'"${KEY}"'","caCertificate":"'"${CABUNDLE}"'"}}}'
 fi
