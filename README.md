@@ -46,7 +46,7 @@ Automatically update TLS Certificates on OpenShift Routes
 
     | Parameter | Default Value | Description |
     | --- | --- | --- |
-    | `CERTBOT_CRON_SCHEDULE` | `0 */6 * * *` | Cronjob Schedule |
+    | `CERTBOT_CRON_SCHEDULE` | `0 */12 * * *` | Cronjob Schedule |
     | `CERTBOT_STAGING` | `false` | Self-signed cert renewals |
     | `CERTBOT_SUSPEND_CRON` | `false` | Suspend cronjob |
     | `CERTBOT_SERVER` | `https://acme-v02.api.letsencrypt.org/directory` | ACME Certbot endpoint |
