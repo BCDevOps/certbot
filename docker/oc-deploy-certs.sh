@@ -147,8 +147,8 @@ fi
 
 set -x
 # if there is no certificate issue, request a new one
-if [ ! -f "${CERTBOT_CONFIG_DIR}/live/openshift-route-certs/ceert.pem" ]; then
-  certbot --config /tmp/certbot.ini certonly $CERTBOT_ARGS --keep-until-expiring --cert-name 'openshift-route-certs' --expand --standalone -d "$(</tmp/certbot-hosts.csv)"
+if [ ! -f "${CERTBOT_CONFIG_DIR}/live/openshift-route-certs/cert.pem" ]; then
+  certbot --config /tmp/certbot.ini certonly $CERTBOT_ARGS --non-interactive --keep-until-expiring --cert-name 'openshift-route-certs' --expand --standalone -d "$(</tmp/certbot-hosts.csv)"
 else
   # if a certificate already exists, request to renew it
   certbot --config /tmp/certbot.ini renew $CERTBOT_ARGS --no-random-sleep-on-renew --cert-name 'openshift-route-certs'
