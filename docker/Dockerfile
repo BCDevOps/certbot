@@ -3,7 +3,8 @@ FROM registry.access.redhat.com/ubi8:8.3-227
 
 RUN set -x && \
     echo -e '[main]\nenabled=0\ndisable_system_repos=1' > /etc/yum/pluginconf.d/subscription-manager.conf && \
-    yum install -y yum-utils python3-pip python3-wheel python3-setuptools && \
+    yum install -y yum-utils python36 && \
+    pip3 install --no-cache-dir --upgrade setuptools pip wheel && \
     pip3 install --no-cache-dir 'certbot==1.10.1' && \
     mkdir -p /var/log/letsencrypt && \
     chgrp -R 0 /var/log/letsencrypt && \
