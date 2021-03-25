@@ -7,18 +7,6 @@ metadata:
   name: certbot
 
 objects:
-  - apiVersion: security.devops.gov.bc.ca/v1alpha1
-    kind: NetworkSecurityPolicy
-    metadata:
-      name: certbot-egress-internet
-    spec:
-      description: |
-        Allow certbot pods to open connections to the internet
-      source:
-        - - "$namespace=${NAMESPACE}"
-          - "app=certbot"
-      destination:
-        - - ext:network=any
   - apiVersion: v1
     kind: ServiceAccount
     metadata:
