@@ -2,7 +2,6 @@
 
 Automatically update TLS Certificates on OpenShift Routes
 
-- [Certbot ![License](LICENSE)](#certbot-)
   - [Assumptions](#assumptions)
   - [Solution](#solution)
   - [Installation](#installation)
