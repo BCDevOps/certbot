@@ -2,6 +2,17 @@
 
 Automatically update TLS Certificates on OpenShift Routes
 
+- [Certbot ![License](LICENSE)](#certbot-)
+  - [Assumptions](#assumptions)
+  - [Solution](#solution)
+  - [Installation](#installation)
+  - [Manual Run](#manual-run)
+  - [Cleanup](#cleanup)
+  - [Entrust Usage](#entrust-usage)
+  - [Tips](#tips)
+  - [References](#references)
+  - [License](#license)
+
 ## Assumptions
 
 - Using <https://letsencrypt.org/> for issuing certificates
@@ -47,13 +58,13 @@ Automatically update TLS Certificates on OpenShift Routes
     | Parameter | Default Value | Description |
     | --- | --- | --- |
     | `CERTBOT_CRON_SCHEDULE` | `0 */12 * * *` | Cronjob Schedule |
-    | `CERTBOT_STAGING` | `false` | Self-signed cert renewals |
+    | `CERTBOT_STAGING` | `false` (must be `false` for [Entrust](#entrust-usage))  | Self-signed cert renewals |
     | `CERTBOT_SUSPEND_CRON` | `false` | Suspend cronjob |
-    | `CERTBOT_SERVER` | `https://acme-v02.api.letsencrypt.org/directory` | ACME Certbot endpoint |
+    | `CERTBOT_SERVER` | `https://acme-v02.api.letsencrypt.org/directory` (for BC Gov SSL, see [Entrust](#entrust-usage)) | ACME Certbot endpoint |
     | `DRYRUN` | `false` | Run without executing |
     | `DEBUG` | `false` | Debug mode |
     | `DELETE_ACME_ROUTES` | `true` | Self cleanup temporary ACME routes when done |
-    | `EMAIL` | | Email where CSR requests are sent to |
+    | `EMAIL` | For [Entrust](#entrust-usage), Product Owner's `@gov.bc.ca` is suggested | Email where CSR requests are sent to |
     | `NAMESPACE` | | Openshift Namespace |
     | `IMAGE_REGISTRY` | `image-registry.openshift-image-registry.svc:5000` | Openshift Image Registry |
     | `SOURCE_IMAGE_NAME` | `certbot` | Image Name |
