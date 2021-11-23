@@ -5,7 +5,7 @@ RUN set -x && \
     echo -e '[main]\nenabled=0\ndisable_system_repos=1' > /etc/yum/pluginconf.d/subscription-manager.conf && \
     yum install -y yum-utils python36 && \
     pip3 install --no-cache-dir --upgrade setuptools pip wheel && \
-    pip3 install --no-cache-dir 'certbot==1.10.1' && \
+    pip3 install --no-cache-dir 'certbot==1.21.0' && \
     mkdir -p /var/log/letsencrypt && \
     chgrp -R 0 /var/log/letsencrypt && \
     chmod -R ugo+rwX /var/log/letsencrypt && \
@@ -22,9 +22,9 @@ RUN set -x && \
 RUN set -x && \
     yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
     yum install '--disablerepo=*' '--enablerepo=epel' -y jq && \
-    curl -sfL https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz -o /tmp/openshift-origin-client-tools.tar.gz && \
-    tar -xzvf /tmp/openshift-origin-client-tools.tar.gz -C /usr/local/bin --strip-components=1 openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit/oc && \
-    rm /tmp/openshift-origin-client-tools.tar.gz && \
+    curl -sfL https://downloads-openshift-console.apps.silver.devops.gov.bc.ca/amd64/linux/oc.tar -o /tmp/openshift-origin-client-tools.tar && \
+    tar -xvf /tmp/openshift-origin-client-tools.tar -C /usr/local/bin  && \
+    rm /tmp/openshift-origin-client-tools.tar && \
     yum clean all -y
 
 COPY oc-deploy-certs.sh /usr/local/bin/oc-deploy-certs.sh
