@@ -93,8 +93,8 @@ objects:
     wildcardPolicy: None
 EOF
 
-#Prepare list of domains
-oc get route -l certbot-managed=true -o json | jq '.items[].spec.host' -r | sort -f | uniq -iu > /tmp/certbot-hosts.txt
+# Prepare list of sorted and unique managed domains
+oc get route -l certbot-managed=true -o=jsonpath='{range .items[*]}{.spec.host}{"\n"}{end}' | sort -fu > /tmp/certbot-hosts.txt
 cat /tmp/certbot-hosts.txt | paste -sd "," - > /tmp/certbot-hosts.csv
 
 echo 'CERTBOT_DEBUG =' $CERTBOT_DEBUG
