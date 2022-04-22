@@ -22,9 +22,7 @@ RUN set -x && \
 RUN set -x && \
     yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
     yum install '--disablerepo=*' '--enablerepo=epel' -y jq && \
-    curl -sfL https://downloads-openshift-console.apps.silver.devops.gov.bc.ca/amd64/linux/oc.tar -o /tmp/openshift-origin-client-tools.tar && \
-    tar -xvf /tmp/openshift-origin-client-tools.tar -C /usr/local/bin  && \
-    rm /tmp/openshift-origin-client-tools.tar && \
+    curl -sfL https://downloads-openshift-console.apps.silver.devops.gov.bc.ca/amd64/linux/oc.tar | tar -xvf - -C /usr/local/bin && \
     yum clean all -y
 
 COPY oc-deploy-certs.sh /usr/local/bin/oc-deploy-certs.sh
