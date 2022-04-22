@@ -116,8 +116,8 @@ if [ "${CERTBOT_DEBUG}" == "true" ]; then
   cat /tmp/certbot.ini
 fi
 
-#List of Routes
-oc get route -l certbot-managed=true -o json | jq '.items[].metadata.name' -r > /tmp/certbot-routes.txt
+# List of Routes
+oc get route -n a7f51d-prod -l certbot-managed=true -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | sort -fu > /tmp/certbot-routes.txt
 
 # Delete well-known/acme-challenge routes
 oc delete route,svc -l app=certbot,well-known=acme-challenge
