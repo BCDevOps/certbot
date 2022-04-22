@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 : "${CERTBOT_CONFIG_DIR:=/etc/letsencrypt}"
 : "${CERTBOT_LOGS_DIR:=/var/log/letsencrypt}"
@@ -201,5 +201,5 @@ if [ "${CERTBOT_DELETE_ACME_ROUTES}" == "true" ]; then
   echo "Deleting ACME service and routes"
   oc delete route,svc -l app=certbot,well-known=acme-challenge
 else
-  echo "ACME service and routes were not deleted, please clean them up manually."  
+  echo "ACME service and routes were not deleted, please clean them up manually."
 fi

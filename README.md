@@ -113,7 +113,7 @@ oc delete all -n $NAMESPACE --selector build=certbot
 
 ## Entrust Usage
 
-Entrust is the only approved certificate provider for BC Gov production environments currently.  There are a few extra steps required to request certificates from Entrust instead of Let's Encrypt.  
+Entrust is the only approved certificate provider for BC Gov production environments currently.  There are a few extra steps required to request certificates from Entrust instead of Let's Encrypt.
 
 1. Start by creating the deployment config found in the [Installation](#installation) section
 
@@ -196,7 +196,7 @@ Entrust is the only approved certificate provider for BC Gov production environm
 
     ``` sh
     export NAMESPACE=<YOURNAMESPACE>
-    
+
     oc patch cronjob -n $NAMESPACE certbot -p '{"spec" : {"suspend" : true }}'
     ```
 
