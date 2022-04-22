@@ -43,7 +43,6 @@ Automatically update TLS Certificates on OpenShift Routes
 
     | Parameter | Default Value | Description |
     | --- | --- | --- |
-    | `BASE_IMAGE` | `registry.access.redhat.com/ubi8:8.3-227` | Base Image to build from |
     | `GIT_REF` | `master` | Git Pull Request or Branch Reference (i.e. 'pull/CHANGE_ID/head') |
     | `GIT_URL` | `https://github.com/BCDevOps/certbot.git` | Git Repository URL |
 

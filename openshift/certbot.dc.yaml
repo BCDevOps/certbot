@@ -11,6 +11,7 @@ objects:
     kind: ServiceAccount
     metadata:
       name: certbot
+
   - apiVersion: v1
     groupNames: null
     kind: RoleBinding
@@ -21,6 +22,7 @@ objects:
     subjects:
       - kind: ServiceAccount
         name: certbot
+
   - apiVersion: v1
     kind: PersistentVolumeClaim
     metadata:
@@ -31,7 +33,8 @@ objects:
         - ReadWriteMany
       resources:
         requests:
-          storage: 1Gi
+          storage: 64Mi
+
   - apiVersion: batch/v1beta1
     kind: CronJob
     metadata:

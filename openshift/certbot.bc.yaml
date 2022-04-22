@@ -14,6 +14,7 @@ objects:
     spec:
       lookupPolicy:
         local: false
+
   - apiVersion: v1
     kind: BuildConfig
     metadata:
@@ -40,7 +41,7 @@ objects:
         dockerStrategy:
           from:
             kind: DockerImage
-            name: "${BASE_IMAGE}"
+            name: docker.io/python:3.10-alpine
         type: Docker
       triggers:
         - type: ConfigChange
@@ -48,11 +49,6 @@ objects:
           imageChange: {}
 
 parameters:
-  - name: BASE_IMAGE
-    description: Base Image to build from
-    displayName: Base Image
-    required: true
-    value: registry.access.redhat.com/ubi8:8.3-227
   - name: GIT_REF
     description: Git Pull Request or Branch Reference (i.e. 'pull/CHANGE_ID/head')
     displayName: Source Repository Reference
