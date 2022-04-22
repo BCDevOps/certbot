@@ -117,7 +117,7 @@ if [ "${CERTBOT_DEBUG}" == "true" ]; then
 fi
 
 # List of Routes
-oc get route -n a7f51d-prod -l certbot-managed=true -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | sort -fu > /tmp/certbot-routes.txt
+oc get route -l certbot-managed=true -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | sort -fu > /tmp/certbot-routes.txt
 
 # Delete well-known/acme-challenge routes
 oc delete route,svc -l app=certbot,well-known=acme-challenge
@@ -125,7 +125,7 @@ oc delete route,svc -l app=certbot,well-known=acme-challenge
 # Create certbot service
 oc create -f /tmp/certbot-svc.yaml
 
-#Create well-known/acme-challenge routes
+# Create well-known/acme-challenge routes
 cat /tmp/certbot-hosts.txt | xargs -n 1 -I {} oc process -f /tmp/certbot-route.yaml -p 'NAME=acme-challenge-{}' -p 'HOST={}' | oc create -f -
 
 # Sleep for 5sec. There was an issue noticed where the pod wasn't able to get a route and was giving 404 error. Not totally certain if this helps.
@@ -162,10 +162,10 @@ fi
 if [ -f $CERTBOT_WORK_DIR/deployed ]; then
   echo 'New certificate(s) have been issued'
 else
-  echo 'NO certificate(s) have been issued'
+  echo 'No certificate(s) have been issued'
 fi
 
-#if [ -f $CERTBOT_WORK_DIR/deployed ]; then
+# if [ -f $CERTBOT_WORK_DIR/deployed ]; then
 echo 'Updating Routes'
 CERTIFICATE="$(awk '{printf "%s\\n", $0}' $CERTBOT_CONFIG_DIR/live/openshift-route-certs/cert.pem)"
 KEY="$(awk '{printf "%s\\n", $0}' $CERTBOT_CONFIG_DIR/live/openshift-route-certs/privkey.pem)"
