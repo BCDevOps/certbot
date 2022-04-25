@@ -1,5 +1,5 @@
 ---
-apiVersion: v1
+apiVersion: template.openshift.io/v1
 kind: Template
 labels:
   app: certbot
@@ -13,8 +13,8 @@ objects:
       name: certbot
 
   - apiVersion: v1
-    groupNames: null
     kind: RoleBinding
+    groupNames: null
     metadata:
       name: certbot_edit
     roleRef:
@@ -35,7 +35,7 @@ objects:
         requests:
           storage: 64Mi
 
-  - apiVersion: batch/v1beta1
+  - apiVersion: batch/v1
     kind: CronJob
     metadata:
       name: certbot
