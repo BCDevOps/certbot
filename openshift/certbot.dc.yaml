@@ -116,6 +116,10 @@ parameters:
   - name: "DELETE_ACME_ROUTES"
     required: false
     value: "true"
+  - name: "SUBSET"
+    description: Allow domain validation to succeed if only a subset of them pass
+    required: false
+    value: "true"
   - name: "EMAIL"
     required: true
   - name: "NAMESPACE"

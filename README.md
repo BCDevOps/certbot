@@ -62,6 +62,7 @@ Automatically update TLS Certificates on OpenShift Routes
     | `DRYRUN` | `false` | Run without executing |
     | `DEBUG` | `false` | Debug mode |
     | `DELETE_ACME_ROUTES` | `true` | Self cleanup temporary ACME routes when done |
+    | `SUBSET` | `true` | Allow domain validation to pass if a subset of them are valid |
     | `EMAIL` | For [Entrust](#entrust-usage), Product Owner's `@gov.bc.ca` is suggested | Email where CSR requests are sent to |
     | `NAMESPACE` | | Openshift Namespace |
     | `IMAGE_REGISTRY` | `image-registry.openshift-image-registry.svc:5000` | Openshift Image Registry |
@@ -71,6 +72,7 @@ Automatically update TLS Certificates on OpenShift Routes
     - For non-prod environments, you may set `CERTBOT_STAGING=true`, so you don't hit any service limits at Let's Encrypt.
     - By default, this template will use Let's Encrypt for certificate generation. If you are just testing, you may use Let's Encrypt testing endpoint `https://acme-staging-v02.api.letsencrypt.org/directory` to avoid being rate limited.
     - For your production applications, we strongly recommend **NOT** using Let's Encrypt certificates. Contact your ministry/department to determine best practices for production SSL/TLS certificate management.
+    - If you are using a certificate provider that gives you extra domains on top of what you have requested (like Entrust), you should make sure that the `SUBSET` option is set to true. Otherwise certificate renewals will always fail because their extra domain will never be managed on our end and choke. If you require stringent domain validation, set `SUBSET` to false explicitly.
 
     ``` sh
     export CERTBOT_SERVER=<YOURCERTBOTSERVER>

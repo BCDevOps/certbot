@@ -8,6 +8,7 @@
 : "${CERTBOT_DELETE_ACME_ROUTES:=true}"
 : "${CERTBOT_DEBUG:=false}"
 : "${CERTBOT_STAGING:=false}"
+: "${CERTBOT_SUBSET:=true}"
 : "${CERTBOT_DRY_RUN:=false}"
 
 if [ -z "$CERTBOT_EMAIL" ]; then echo "Missing 'CERTBOT_EMAIL' environment variable" && exit 1; fi
@@ -139,6 +140,10 @@ fi
 
 if [ "${CERTBOT_DEBUG}" == "true" ]; then
   CERTBOT_ARGS="${CERTBOT_ARGS} --debug"
+fi
+
+if [ "${CERTBOT_SUBSET}" == "true" ]; then
+  CERTBOT_ARGS="${CERTBOT_ARGS} --allow-subset-of-names"
 fi
 
 if [ ! -z "$CERTBOT_SERVER" ]; then
