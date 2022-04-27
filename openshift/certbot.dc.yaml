@@ -3,6 +3,7 @@ apiVersion: template.openshift.io/v1
 kind: Template
 labels:
   app: certbot
+  template: certbot-template
 metadata:
   name: certbot
 
@@ -40,7 +41,7 @@ objects:
     metadata:
       name: certbot
     spec:
-      concurrencyPolicy: Replace
+      concurrencyPolicy: Forbid
       failedJobsHistoryLimit: 3
       successfulJobsHistoryLimit: 3
       startingDeadlineSeconds: 60
@@ -55,24 +56,27 @@ objects:
             metadata:
               labels:
                 app: certbot
+                template: certbot-template
             spec:
               containers:
                 - name: certbot
-                  image: "${IMAGE_REGISTRY}/${NAMESPACE}/${SOURCE_IMAGE_NAME}:${TAG_NAME}"
+                  image: "${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/${IMAGE_NAME}:${IMAGE_TAG}"
                   imagePullPolicy: Always
                   env:
-                    - name: CERTBOT_EMAIL
-                      value: "${EMAIL}"
                     - name: CERTBOT_DEBUG
-                      value: "${DEBUG}"
+                      value: "${CERTBOT_DEBUG}"
                     - name: CERTBOT_DELETE_ACME_ROUTES
-                      value: "${DELETE_ACME_ROUTES}"
-                    - name: CERTBOT_STAGING
-                      value: "${CERTBOT_STAGING}"
+                      value: "${CERTBOT_DELETE_ACME_ROUTES}"
                     - name: CERTBOT_DRY_RUN
-                      value: "${DRYRUN}"
+                      value: "${CERTBOT_DRYRUN}"
+                    - name: CERTBOT_EMAIL
+                      value: "${CERTBOT_EMAIL}"
                     - name: CERTBOT_SERVER
                       value: "${CERTBOT_SERVER}"
+                    - name: CERTBOT_STAGING
+                      value: "${CERTBOT_STAGING}"
+                    - name: CERTBOT_SUBSET
+                      value: "${CERTBOT_SUBSET}"
                   resources:
                     requests:
                       cpu: 50m
@@ -87,52 +91,75 @@ objects:
                 - name: certbot-config
                   persistentVolumeClaim:
                     claimName: certbot
-      schedule: "${CERTBOT_CRON_SCHEDULE}"
-      suspend: "${{CERTBOT_SUSPEND_CRON}}"
+      schedule: "${CRON_SCHEDULE}"
+      suspend: "${{CRON_SUSPEND}}"
 
 parameters:
-  # https://crontab.guru/every-6-hours
-  - name: "CERTBOT_CRON_SCHEDULE"
-    required: false
-    value: "0 */12 * * *"
+  - name: CERTBOT_DEBUG
+    description: Run Certbot in debug mode
+    required: true
+    value: "false"
+
+  - name: CERTBOT_DELETE_ACME_ROUTES
+    description: Self cleanup temporary ACME routes when done
+    required: true
+    value: "true"
+
+  - name: CERTBOT_DRYRUN
+    description: Run without executing
+    required: true
+    value: "false"
+
+  - name: CERTBOT_EMAIL
+    description: Email where CSR requests are sent to. For Entrust, Product Owner's `*@gov.bc.ca` is suggested
+    required: true
+
+  - name: CERTBOT_STAGING
+    description: Use self-signed cert renewals. Must be false if using Entrust
+    required: true
+    value: "false"
     # Let's Encrypt Stage environment will help with non-prod cert renewals, so you don't hit limits
-  - name: "CERTBOT_STAGING"
-    required: false
-    value: "false"
-    # In environments using wildcard *.apps.silver.devops cert, you might want to create the cronjob for consistency, but suspend it
-  - name: "CERTBOT_SUSPEND_CRON"
-    required: false
-    value: "false"
-  - name: "CERTBOT_SERVER"
+
+  - name: CERTBOT_SERVER
     required: true
-    value: "https://acme-v02.api.letsencrypt.org/directory"
-    # staging Server: https://acme-staging-v02.api.letsencrypt.org/directory
-  - name: "DRYRUN"
-    required: false
-    value: "false"
-  - name: "DEBUG"
-    required: false
-    value: "false"
-  - name: "DELETE_ACME_ROUTES"
-    required: false
+    value: https://acme-v02.api.letsencrypt.org/directory
+    # Staging Server: https://acme-staging-v02.api.letsencrypt.org/directory
+    # Entrust Server: https://www.entrust.net/acme/api/v1/directory/xx-xxxx-xxxx
+
+  - name: CERTBOT_SUBSET
+    description: Allow domain validation to pass if a subset of them are valid
+    required: true
     value: "true"
-  - name: "SUBSET"
-    description: Allow domain validation to succeed if only a subset of them pass
-    required: false
-    value: "true"
-  - name: "EMAIL"
+
+  - name: CRON_SCHEDULE
+    description: Cronjob Schedule
     required: true
-  - name: "NAMESPACE"
+    value: 0 0 * * 1,4
+    # Every Monday & Thursday - https://crontab.guru/#0_0_*_*_1,4
+
+  - name: CRON_SUSPEND
+    description: Suspend cronjob
     required: true
-    value: ""
-  - name: "IMAGE_REGISTRY"
-    description: The base OpenShift docker registry
-    displayName: Docker Image Registry
+    value: "false"
+    # In test environments, you might want to create the cronjob for consistency, but suspend it
+
+  - name: IMAGE_REGISTRY
+    description: Image Registry
     required: true
-    value: image-registry.openshift-image-registry.svc:5000
-  - name: "SOURCE_IMAGE_NAME"
-    required: false
-    value: "certbot"
-  - name: "TAG_NAME"
-    required: false
-    value: "latest"
+    value: docker.io
+    # Internal OpenShift container registry: image-registry.openshift-image-registry.svc:5000
+
+  - name: IMAGE_NAMESPACE
+    description: Image Namespace
+    required: true
+    value: bcgovimages
+
+  - name: IMAGE_NAME
+    description: Image Name
+    required: true
+    value: certbot
+
+  - name: IMAGE_TAG
+    description: Image Tag. We recommend pinning this to a specific release veresion for stability
+    required: true
+    value: latest

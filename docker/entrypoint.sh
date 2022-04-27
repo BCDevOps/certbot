@@ -1,17 +1,20 @@
 #!/bin/bash
 
 : "${CERTBOT_CONFIG_DIR:=/etc/letsencrypt}"
+: "${CERTBOT_DEPLOY_DIR:=/etc/letsencrypt/renewal-hooks/deploy}"
 : "${CERTBOT_LOGS_DIR:=/var/log/letsencrypt}"
 : "${CERTBOT_WORK_DIR:=/var/lib/letsencrypt}"
-: "${CERTBOT_DEPLOY_DIR:=/etc/letsencrypt/renewal-hooks/deploy}"
-: "${CERTBOT_RSA_KEY_SIZE:=2048}"
-: "${CERTBOT_DELETE_ACME_ROUTES:=true}"
 : "${CERTBOT_DEBUG:=false}"
+: "${CERTBOT_DELETE_ACME_ROUTES:=true}"
+: "${CERTBOT_DRY_RUN:=false}"
+: "${CERTBOT_RSA_KEY_SIZE:=2048}"
 : "${CERTBOT_STAGING:=false}"
 : "${CERTBOT_SUBSET:=true}"
-: "${CERTBOT_DRY_RUN:=false}"
 
-if [ -z "$CERTBOT_EMAIL" ]; then echo "Missing 'CERTBOT_EMAIL' environment variable" && exit 1; fi
+if [ -z "$CERTBOT_EMAIL" ]; then
+  echo "Missing 'CERTBOT_EMAIL' environment variable"
+  exit 1
+fi
 
 mkdir -p "$CERTBOT_CONFIG_DIR" "$CERTBOT_WORK_DIR" "$CERTBOT_LOGS_DIR" "$CERTBOT_DEPLOY_DIR"
 
