@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ template "certbot.fullname" . }}
+  labels: {{ include "certbot.labels" . | nindent 4 }}
+spec:
+  storageClassName: netapp-file-standard
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 64Mi
