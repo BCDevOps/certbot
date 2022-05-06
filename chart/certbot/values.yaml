@@ -32,4 +32,6 @@ cron:
   suspend: false
 
 # Run the certbot job manually as a post-install/post-upgrade hook
+# Setting this to true is useful when you install your application chart,
+# so that the SSL cert is created automatically
 manualRun: false
