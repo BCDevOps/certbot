@@ -104,7 +104,14 @@ template:
           - name: CERTBOT_EMAIL
             value: {{ .Values.certbot.email | quote }}
           - name: CERTBOT_SERVER
+            {{- if kindIs "string" .Values.certbot.server }}
             value: {{ .Values.certbot.server }}
+            {{- else }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.certbot.server.secretName }}
+                key: {{ .Values.certbot.server.secretKey }}
+            {{- end }}
           - name: CERTBOT_STAGING
             value: {{ .Values.certbot.staging | quote }}
           - name: CERTBOT_SUBSET

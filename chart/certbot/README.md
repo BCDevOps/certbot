@@ -111,3 +111,14 @@ spec:
 ## Artifactory Usage
 
 If you want to use Artifactory's local caching to download the docker image, you can set `artifactoryProxy.enabled: true` and provide the name of your `ArtifactoryServiceAccount` with `artifactoryProxy.artifactoryServiceAccount`. The chart will then add your artifactory pull secret to the job's `imagePullSecrets`.
+
+## Usage with Entrust
+
+When issuing certificate using the Entrust ACME server, you may want to keep the server URL in a Secret. The `certbot.server` supports this by allowing either a string, or the following object:
+
+```yaml
+certbot:
+  server:
+    secretName: your-acme-server-secret
+    secretKey: acme-server-url
+```
