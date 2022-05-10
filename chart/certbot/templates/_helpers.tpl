@@ -102,7 +102,7 @@ template:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
           - name: CERTBOT_DEBUG
-            value: {{ .Values.certbot.debug  | quote }}
+            value: {{ .Values.certbot.debug | quote }}
           - name: CERTBOT_DELETE_ACME_ROUTES
             value: {{ .Values.certbot.deleteAcmeRoutes | quote }}
           - name: CERTBOT_DRY_RUN
