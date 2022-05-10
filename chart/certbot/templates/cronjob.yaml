@@ -11,6 +11,9 @@ spec:
   jobTemplate:
     metadata:
       labels: {{ include "certbot.labels" . | nindent 8 }}
+{{- /*
+The certbot.jobSpec function is imported from the _helpers.tpl file, following the helm convention.
+*/}}
     spec: {{ include "certbot.jobSpec" . | nindent 6 }}
   schedule: {{ .Values.cron.schedule }}
   suspend: {{ .Values.cron.suspend }}

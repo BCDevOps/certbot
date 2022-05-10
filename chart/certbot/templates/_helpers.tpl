@@ -62,6 +62,9 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 
+{{- /*
+  The artifactory image pull secret to use, retrieved from the provided ArtifactoryServiceAccount
+  */}}
 {{- define "certbot.artifactoryPullSecret" }}
 {{- $artSa := (lookup "artifactory.devops.gov.bc.ca/v1alpha1" "ArtifactoryServiceAccount" .Release.Namespace .Values.artifactoryProxy.artifactoryServiceAccount) }}
 {{- if $artSa.spec }}
@@ -74,6 +77,9 @@ When running helm template, or using --dry-run, lookup returns an empty object
 {{- end }}
 {{- end }}
 
+{{- /*
+  A reuseable job spec, used in both the cron and batch job templates.
+  */}}
 {{- define "certbot.jobSpec" }}
 backoffLimit: 6
 activeDeadlineSeconds: 300

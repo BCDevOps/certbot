@@ -6,5 +6,8 @@ metadata:
   labels: {{ include "certbot.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": post-install,post-upgrade
+{{- /*
+The certbot.jobSpec function is imported from the _helpers.tpl file, following the helm convention.
+*/}}
 spec: {{ include "certbot.jobSpec" . | nindent 2 }}
 {{- end }}
