@@ -1,0 +1,46 @@
+
+image:
+  repository: bcgovimages/certbot
+  tag: latest
+  pullPolicy: Always
+
+artifactoryProxy:
+  enabled: false
+  artifactoryPrefix: artifacts.developer.gov.bc.ca/docker-remote
+  # You need to set this if you are using artifactoryProxy.enabled: true
+  artifactoryServiceAccount: ~
+
+certbot:
+  debug: false
+  dryRun: false
+
+  # Self cleanup temporary ACME routes when done
+  deleteAcmeRoutes: true
+
+  # Email where CSR requests are sent to. For Entrust, Product Owner's `*@gov.bc.ca` is suggested
+  email: ~
+
+  # Use self-signed cert renewals. Must be false if using Entrust
+  staging: false
+
+  # Staging Server: https://acme-staging-v02.api.letsencrypt.org/directory
+  # Entrust Server: https://www.entrust.net/acme/api/v1/directory/xx-xxxx-xxxx
+  # You can also retrieve the server from a secret:
+  # server:
+  #   secretName: your-acme-server-secret
+  #   secretKey: acme-server-url
+  server: https://acme-v02.api.letsencrypt.org/directory
+
+  # Allow domain validation to pass if a subset of them are vali
+  subset: true
+
+cron:
+  # Every Monday & Thursday - https://crontab.guru/#0_0_*_*_1,4
+  schedule: 0 0 * * 1,4
+  # In test environments, you might want to create the cronjob for consistency, but suspend it
+  suspend: false
+
+# Run the certbot job manually as a post-install/post-upgrade hook
+# Setting this to true is useful when you install your application chart,
+# so that the SSL cert is created automatically
+manualRun: false
