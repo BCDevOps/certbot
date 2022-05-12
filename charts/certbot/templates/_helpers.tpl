@@ -131,7 +131,7 @@ template:
           - mountPath: /etc/letsencrypt
             name: certbot-config
     restartPolicy: Never
-    serviceAccountName: certbot
+    serviceAccountName: {{ template "certbot.fullname" . }}
     volumes:
       - name: certbot-config
         persistentVolumeClaim:
