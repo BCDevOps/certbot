@@ -1,0 +1,44 @@
+apiVersion: authorization.openshift.io/v1
+kind: Role
+metadata:
+  labels: {{ include "certbot.labels" . | nindent 4 }}
+  annotations:
+    openshift.io/description: Least-privilege role for the Certbot job
+  name: {{ template "certbot.fullname" . }}
+rules:
+  - apiGroups:
+      - template.openshift.io
+    resources:
+      - processedtemplates
+    verbs:
+      - create
+  - apiGroups:
+      - ""
+    resources:
+      - services
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - route.openshift.io
+    resources:
+      - routes
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - route.openshift.io
+      - ""
+    attributeRestrictions: null
+    resources:
+      - routes/custom-host
+    verbs:
+      - create
