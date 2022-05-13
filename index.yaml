@@ -3,6 +3,16 @@ entries:
   certbot:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2022-05-13T20:19:48.436644482Z"
+    description: A Helm chart for the Common Services Certbot
+    digest: 3034f14ae81a3a814e0fe608ff8d43d76a08b355e3eb8659e70449926edb8231
+    name: certbot
+    type: application
+    urls:
+    - https://github.com/BCDevOps/certbot/releases/download/certbot-0.1.1/certbot-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2022-05-10T19:27:52.152842479Z"
     description: A Helm chart for the Common Services Certbot
     digest: b009a501913e168eeb9aa07b690c5b5888bfdcf089d9404d8e96dba79c257f2e
@@ -11,4 +21,4 @@ entries:
     urls:
     - https://github.com/BCDevOps/certbot/releases/download/certbot-0.1.0/certbot-0.1.0.tgz
     version: 0.1.0
-generated: "2022-05-10T19:27:52.15284758Z"
+generated: "2022-05-13T20:19:48.436653482Z"
