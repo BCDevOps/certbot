@@ -1,0 +1,31 @@
+name: Pull Request Opened
+
+env:
+  APP_NAME: certbot
+
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  build:
+    name: Build & Push to GHCR
+    if: "! github.event.pull_request.head.repo.fork"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build & Push to GHCR
+        uses: ./.github/actions/build-push-container
+        with:
+          context: ./docker
+          image_name: ${{ env.APP_NAME }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          token: ${{ secrets.GITHUB_TOKEN }}
