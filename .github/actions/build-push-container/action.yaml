@@ -26,18 +26,23 @@ runs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Lowercase Username
+      shell: bash
+      run: |
+        echo "USERNAME=$(tr '[:upper:]' '[:lower:]' <<< '${{ inputs.username }}')" >> $GITHUB_ENV
+
     - name: Login to Container Registry
       uses: docker/login-action@v1
       with:
         registry: ${{ inputs.registry }}
-        username: ${{ inputs.username }}
+        username: ${{ env.USERNAME }}
         password: ${{ inputs.token }}
 
     - name: Prepare Container Metadata tags
       id: meta
       uses: docker/metadata-action@v3
       with:
-        images: ${{ inputs.registry }}/${{ inputs.username }}/${{ inputs.image_name }}
+        images: ${{ inputs.registry }}/${{ env.USERNAME }}/${{ inputs.image_name }}
         # Always updates the 'latest' tag
         flavor: |
           latest=true
@@ -61,4 +66,5 @@ runs:
 
     - name: Inspect Docker Image
       shell: bash
-      run: docker image inspect ${{ inputs.registry }}/${{ inputs.username }}/${{ inputs.image_name }}:latest
+      run: |
+        docker image inspect ${{ inputs.registry }}/${{ env.USERNAME }}/${{ inputs.image_name }}:latest
