@@ -26,6 +26,5 @@ jobs:
         with:
           context: ./docker
           image_name: ${{ env.APP_NAME }}
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          github_username: ${{ github.repository_owner }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
