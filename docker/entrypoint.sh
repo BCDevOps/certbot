@@ -97,6 +97,27 @@ objects:
     wildcardPolicy: None
 EOF
 
+cat > /tmp/certbot-np.yaml <<'EOF'
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: certbot-allow-ingress
+  labels:
+    app: certbot
+    well-known: acme-challenge
+spec:
+  podSelector:
+    matchLabels:
+      app: certbot
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              network.openshift.io/policy-group: ingress
+  policyTypes:
+    - Ingress
+EOF
+
 # Prepare list of sorted and unique managed domains
 oc get route -l certbot-managed=true -o=jsonpath='{range .items[*]}{.spec.host}{"\n"}{end}' | sort -fu > /tmp/certbot-hosts.txt
 cat /tmp/certbot-hosts.txt | paste -sd "," - > /tmp/certbot-hosts.csv
@@ -116,6 +137,9 @@ if [ "${CERTBOT_DEBUG}" == "true" ]; then
   echo '*********** contents of /tmp/certbot-svc.yaml:'
   cat /tmp/certbot-svc.yaml
 
+  echo '*********** contents of /tmp/certbot-np.yaml:'
+  cat /tmp/certbot-np.yaml
+
   echo '*********** contents of /tmp/certbot.ini:'
   cat /tmp/certbot.ini
 fi
@@ -125,6 +149,9 @@ oc get route -l certbot-managed=true -o=jsonpath='{range .items[*]}{.metadata.na
 
 # Delete well-known/acme-challenge routes
 oc delete route,svc -l app=certbot,well-known=acme-challenge
+
+# Create certbot network policy
+oc create -f /tmp/certbot-np.yaml
 
 # Create certbot service
 oc create -f /tmp/certbot-svc.yaml
@@ -207,7 +234,7 @@ fi
 if [ "${CERTBOT_DELETE_ACME_ROUTES}" == "true" ]; then
   # Delete well-known/acme-challenge routes
   echo "Deleting ACME service and routes"
-  oc delete route,svc -l app=certbot,well-known=acme-challenge
+  oc delete route,svc,networkpolicy -l app=certbot,well-known=acme-challenge
 else
   echo "ACME service and routes were not deleted, please clean them up manually."
 fi
