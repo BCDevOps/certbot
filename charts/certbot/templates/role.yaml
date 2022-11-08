@@ -42,3 +42,14 @@ rules:
       - routes/custom-host
     verbs:
       - create
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - networkpolicies
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - patch
+      - delete
