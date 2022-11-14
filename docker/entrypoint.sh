@@ -1,7 +1,8 @@
 #!/bin/bash
 
 : "${CERTBOT_CONFIG_DIR:=/etc/letsencrypt}"
-: "${CERTBOT_DEPLOY_DIR:=/etc/letsencrypt/renewal-hooks/deploy}"
+: "${CERTBOT_RENEWAL_DIR:=${CERTBOT_CONFIG_DIR}/renewal}"
+: "${CERTBOT_DEPLOY_DIR:=${CERTBOT_CONFIG_DIR}/renewal-hooks/deploy}"
 : "${CERTBOT_LOGS_DIR:=/var/log/letsencrypt}"
 : "${CERTBOT_WORK_DIR:=/var/lib/letsencrypt}"
 : "${CERTBOT_DEBUG:=false}"
@@ -10,37 +11,75 @@
 : "${CERTBOT_RSA_KEY_SIZE:=2048}"
 : "${CERTBOT_STAGING:=false}"
 : "${CERTBOT_SUBSET:=true}"
+: "${CERTBOT_CERT_PER_HOST:=false}"
+: "${CERTBOT_COMBINED_CERT_NAME:=openshift-route-certs}"
 
-if [ -z "$CERTBOT_EMAIL" ]; then
+if [ -z "${CERTBOT_EMAIL}" ]; then
   echo "Missing 'CERTBOT_EMAIL' environment variable"
   exit 1
 fi
 
-mkdir -p "$CERTBOT_CONFIG_DIR" "$CERTBOT_WORK_DIR" "$CERTBOT_LOGS_DIR" "$CERTBOT_DEPLOY_DIR"
+function deleteAcmeChallengeRoutes() {
+  echo "Deleting ACME challenge resources ..."
+  oc delete route,svc,networkpolicy -l app=certbot,well-known=acme-challenge
+}
+
+function getCertificate() {
+  certificateName=${1}
+  domainList=${2}
+
+  CERTBOT_ARGS='--no-random-sleep --no-eff-email'
+  if [ "${CERTBOT_DRY_RUN}" == "true" ]; then
+    CERTBOT_ARGS="${CERTBOT_ARGS} --dry-run"
+  fi
+
+  if [ "${CERTBOT_DEBUG}" == "true" ]; then
+    CERTBOT_ARGS="${CERTBOT_ARGS} --debug"
+  fi
+
+  if [ "${CERTBOT_SUBSET}" == "true" ]; then
+    CERTBOT_ARGS="${CERTBOT_ARGS} --allow-subset-of-names"
+  fi
+
+  if [ ! -z "$CERTBOT_SERVER" ]; then
+    CERTBOT_ARGS="${CERTBOT_ARGS} --server ${CERTBOT_SERVER}"
+  fi
+
+  set -x
+  # If there is no certificate issued request a new one, otherwise request a renewal.
+  if [ ! -f "${CERTBOT_CONFIG_DIR}/live/${certificateName}/cert.pem" ]; then
+    certbot --config /tmp/certbot.ini certonly $CERTBOT_ARGS --non-interactive --keep-until-expiring --cert-name ${certificateName} --expand --standalone -d ${domainList}
+  else
+    certbot --config /tmp/certbot.ini renew $CERTBOT_ARGS --no-random-sleep-on-renew --cert-name ${certificateName}
+  fi
+  set +x
+}
+
+mkdir -p "${CERTBOT_CONFIG_DIR}" "${CERTBOT_WORK_DIR}" "${CERTBOT_LOGS_DIR}" "${CERTBOT_DEPLOY_DIR}"
 
 cat > /tmp/certbot.ini <<EOF
-rsa-key-size = $CERTBOT_RSA_KEY_SIZE
+rsa-key-size = ${CERTBOT_RSA_KEY_SIZE}
 authenticator = standalone
 http-01-port = 8080
 https-port = 4443
 preferred-challenges = http
 agree-tos = true
-email = $CERTBOT_EMAIL
+email = ${CERTBOT_EMAIL}
 
-config-dir = $CERTBOT_CONFIG_DIR
-work-dir = $CERTBOT_WORK_DIR
-logs-dir = $CERTBOT_LOGS_DIR
+config-dir = ${CERTBOT_CONFIG_DIR}
+work-dir = ${CERTBOT_WORK_DIR}
+logs-dir = ${CERTBOT_LOGS_DIR}
 EOF
 
 if [ "${CERTBOT_STAGING}" == "true" ]; then
   echo "staging = true" >> /tmp/certbot.ini
 fi
 
-cat > $CERTBOT_CONFIG_DIR/renewal-hooks/deploy/set-deployed-flag.sh << EOF
+cat > ${CERTBOT_DEPLOY_DIR}/set-deployed-flag.sh << EOF
 #!/bin/sh
-touch $CERTBOT_WORK_DIR/deployed
+touch ${CERTBOT_WORK_DIR}/deployed
 EOF
-chmod +x $CERTBOT_CONFIG_DIR/renewal-hooks/deploy/set-deployed-flag.sh
+chmod +x ${CERTBOT_DEPLOY_DIR}/set-deployed-flag.sh
 
 cat > /tmp/certbot-svc.yaml <<'EOF'
 apiVersion: v1
@@ -118,18 +157,49 @@ spec:
     - Ingress
 EOF
 
-# Prepare list of sorted and unique managed domains
-oc get route -l certbot-managed=true -o=jsonpath='{range .items[*]}{.spec.host}{"\n"}{end}' | sort -fu > /tmp/certbot-hosts.txt
-cat /tmp/certbot-hosts.txt | paste -sd "," - > /tmp/certbot-hosts.csv
+# Get a mapping of all managed routes and their hosts
+routeMap=$(oc get route -l certbot-managed=true -o=jsonpath='{range .items[*]}{.metadata.name}={.spec.host}{"\n"}{end}')
 
-echo 'CERTBOT_DEBUG =' $CERTBOT_DEBUG
+# Declare and populate a hash table to use as a dictionary for mapping the routes to their hosts.
+# - The host name will also be used as the certificate name in the case individual certificates are being requested.
+declare -A managedRoutes
+for item in ${routeMap}; do
+  # Filter out platform routes
+  if [[ "${item}" != *apps.silver.devops.gov.bc.ca* ]]; then
+    # Use the route's name as the key
+    # and the host name as the value
+    key=${item%%=*}
+    value=${item#*=}
+    managedRoutes[${key}]=${value}
+  fi
+done
+
+# Generate a list of sorted and unique managed domains (hosts), and a list of sorted and unique routes
+echo "${managedRoutes[@]}" | tr " " "\n" | sort -fu > /tmp/certbot-hosts.txt
+cat /tmp/certbot-hosts.txt | paste -sd "," - > /tmp/certbot-hosts.csv
+echo "${!managedRoutes[@]}" | tr " " "\n" | sort -fu > /tmp/certbot-routes.txt
+
+echo 'CERTBOT_DEBUG =' ${CERTBOT_DEBUG}
 # Dump contents of files to help troubleshoot in case of problems
 if [ "${CERTBOT_DEBUG}" == "true" ]; then
+  echo '*********** full list of detected routes (route=host):'
+  for item in ${routeMap}; do
+    echo "  ${item}"
+  done
+
+  echo '*********** resulting filtered mapping of routes to hosts (certificate names):'
+  for route in "${!managedRoutes[@]}"; do
+    echo "  ${route}: ${managedRoutes[${route}]}"
+  done
+
   echo '*********** contents of /tmp/certbot-hosts.csv:'
   cat /tmp/certbot-hosts.csv
 
   echo '*********** contents of /tmp/certbot-hosts.txt:'
   cat /tmp/certbot-hosts.txt
+
+  echo '*********** contents of /tmp/certbot-routes.txt:'
+  cat /tmp/certbot-routes.txt
 
   echo '*********** contents of /tmp/certbot-route.yaml:'
   cat /tmp/certbot-route.yaml
@@ -144,11 +214,8 @@ if [ "${CERTBOT_DEBUG}" == "true" ]; then
   cat /tmp/certbot.ini
 fi
 
-# List of Routes
-oc get route -l certbot-managed=true -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | sort -fu > /tmp/certbot-routes.txt
-
 # Delete well-known/acme-challenge routes
-oc delete route,svc -l app=certbot,well-known=acme-challenge
+deleteAcmeChallengeRoutes
 
 # Create certbot network policy
 oc create -f /tmp/certbot-np.yaml
@@ -162,79 +229,77 @@ cat /tmp/certbot-hosts.txt | xargs -n 1 -I {} oc process -f /tmp/certbot-route.y
 # Sleep for 5sec. There was an issue noticed where the pod wasn't able to get a route and was giving 404 error. Not totally certain if this helps.
 sleep 5s
 
-rm -f $CERTBOT_WORK_DIR/deployed
-CERTBOT_ARGS='--no-random-sleep --no-eff-email'
-if [ "${CERTBOT_DRY_RUN}" == "true" ]; then
-  CERTBOT_ARGS="${CERTBOT_ARGS} --dry-run"
-fi
+rm -f ${CERTBOT_WORK_DIR}/deployed
 
-if [ "${CERTBOT_DEBUG}" == "true" ]; then
-  CERTBOT_ARGS="${CERTBOT_ARGS} --debug"
-fi
-
-if [ "${CERTBOT_SUBSET}" == "true" ]; then
-  CERTBOT_ARGS="${CERTBOT_ARGS} --allow-subset-of-names"
-fi
-
-if [ ! -z "$CERTBOT_SERVER" ]; then
-  CERTBOT_ARGS="${CERTBOT_ARGS} --server ${CERTBOT_SERVER}"
-fi
-
-set -x
-# if there is no certificate issue, request a new one
-if [ ! -f "${CERTBOT_CONFIG_DIR}/live/openshift-route-certs/cert.pem" ]; then
-  certbot --config /tmp/certbot.ini certonly $CERTBOT_ARGS --non-interactive --keep-until-expiring --cert-name 'openshift-route-certs' --expand --standalone -d "$(</tmp/certbot-hosts.csv)"
+# Get certificate(s), either combined or individual
+if [ "${CERTBOT_CERT_PER_HOST}" == "true" ]; then
+  echo "Manage individual certificates for each unique host."  
+  for certbot_host in $(</tmp/certbot-hosts.txt); do
+    getCertificate "${certbot_host}" "${certbot_host}"
+  done
 else
-  # if a certificate already exists, request to renew it
-  certbot --config /tmp/certbot.ini renew $CERTBOT_ARGS --no-random-sleep-on-renew --cert-name 'openshift-route-certs'
-fi
-set +x
+  echo "Managing a single certificate covering all managed hosts."
+  getCertificate "${CERTBOT_COMBINED_CERT_NAME}" "$(</tmp/certbot-hosts.csv)"
 
-if [ "${CERTBOT_DRY_RUN}" == "true" ]; then
-  exit 0
+  # Re-Map the managed route dictionary so all routes get patched with the combined certificate.
+  for route in "${!managedRoutes[@]}"; do
+    managedRoutes[${route}]="${CERTBOT_COMBINED_CERT_NAME}"
+  done
 fi
 
-if [ -f $CERTBOT_WORK_DIR/deployed ]; then
+if [ -f ${CERTBOT_WORK_DIR}/deployed ]; then
   echo 'New certificate(s) have been issued'
 else
-  echo 'No certificate(s) have been issued'
+  echo 'No new certificate(s) have been issued'
 fi
 
-# if [ -f $CERTBOT_WORK_DIR/deployed ]; then
-echo 'Updating Routes'
-CERTIFICATE="$(awk '{printf "%s\\n", $0}' $CERTBOT_CONFIG_DIR/live/openshift-route-certs/cert.pem)"
-KEY="$(awk '{printf "%s\\n", $0}' $CERTBOT_CONFIG_DIR/live/openshift-route-certs/privkey.pem)"
-CABUNDLE=$(awk '{printf "%s\\n", $0}' $CERTBOT_CONFIG_DIR/live/openshift-route-certs/fullchain.pem)
+# Patch Routes
+for route in "${!managedRoutes[@]}"; do
+  certificateName=${managedRoutes[${route}]}
 
-# If any of the cert components is blank, then don't run the patch command
-if [ "${CERTIFICATE}" == "" ] || [ "${KEY}" == "" ] || [ "${CABUNDLE}" == "" ]; then
-  echo "Certs weren't created properly and no routes were patched."
-else
-  cat /tmp/certbot-routes.txt | xargs -n 1 -I {} oc patch "route/{}" -p '{"spec":{"tls":{"certificate":"'"${CERTIFICATE}"'","key":"'"${KEY}"'","caCertificate":"'"${CABUNDLE}"'"}}}'
-fi
+  echo "Updating route/${route} with certificate ${certificateName} ..."
+  CERTIFICATE="$(awk '{printf "%s\\n", $0}' ${CERTBOT_CONFIG_DIR}/live/${certificateName}/cert.pem)"
+  KEY="$(awk '{printf "%s\\n", $0}' ${CERTBOT_CONFIG_DIR}/live/${certificateName}/privkey.pem)"
+  CABUNDLE=$(awk '{printf "%s\\n", $0}' ${CERTBOT_CONFIG_DIR}/live/${certificateName}/fullchain.pem)
 
-# Print the log file if debugging is enabled
+  # If any of the cert components is blank, then don't run the patch command
+  if [ "${CERTBOT_DRY_RUN}" == "true" ]; then
+    echo "Dry Run - the certificate for route/${route} was not patched."
+  elif [ "${CERTIFICATE}" == "" ] || [ "${KEY}" == "" ] || [ "${CABUNDLE}" == "" ]; then
+    echo "The certificate for route/${route} wasn't created properly so it won't be patched."
+  else
+    oc patch "route/${route}" -p '{"spec":{"tls":{"certificate":"'"${CERTIFICATE}"'","key":"'"${KEY}"'","caCertificate":"'"${CABUNDLE}"'"}}}'
+  fi
+done
+
 if [ "${CERTBOT_DEBUG}" == "true" ]; then
-  echo '*********** list of all files/folder under /etc/letsencrypt:'
-  find /etc/letsencrypt
 
-  echo '*********** list of all files/folder under /var/log/letsencrypt:'
-  find /var/log/letsencrypt
+  echo '*********** final mapping of routes to hosts (certificate names):'
+  for route in "${!managedRoutes[@]}"; do
+    echo "  ${route}: ${managedRoutes[${route}]}"
+  done
 
-  echo '*********** list of all files/folder under /var/lib/letsencrypt:'
-  find /var/lib/letsencrypt
+  echo "*********** list of all files/folder under ${CERTBOT_CONFIG_DIR}:"
+  find ${CERTBOT_CONFIG_DIR}
 
-  echo '*********** contents of /var/log/letsencrypt/letsencrypt.log:'
-  cat /var/log/letsencrypt/letsencrypt.log
+  echo "*********** list of all files/folder under ${CERTBOT_LOGS_DIR}:"
+  find ${CERTBOT_LOGS_DIR}
 
-  echo '*********** contents of /etc/letsencrypt/renewal/openshift-route-certs.conf:'
-  cat /etc/letsencrypt/renewal/openshift-route-certs.conf
+  echo "*********** list of all files/folder under ${CERTBOT_WORK_DIR}:"
+  find ${CERTBOT_WORK_DIR}
+
+  echo "*********** contents of ${CERTBOT_LOGS_DIR}/letsencrypt.log:"
+  cat ${CERTBOT_LOGS_DIR}/letsencrypt.log
+
+  for confFile in $(ls ${CERTBOT_RENEWAL_DIR} -1); do
+    echo "*********** contents of ${confFile}:"
+    cat "${CERTBOT_RENEWAL_DIR}/${confFile}"
+  done
 fi
 
 if [ "${CERTBOT_DELETE_ACME_ROUTES}" == "true" ]; then
   # Delete well-known/acme-challenge routes
-  echo "Deleting ACME service and routes"
-  oc delete route,svc,networkpolicy -l app=certbot,well-known=acme-challenge
+  deleteAcmeChallengeRoutes
 else
-  echo "ACME service and routes were not deleted, please clean them up manually."
+  echo "ACME challenge resources (services, routes, and network policies) were not deleted, please clean them up manually."
 fi

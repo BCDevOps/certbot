@@ -122,6 +122,8 @@ template:
             value: {{ .Values.certbot.staging | quote }}
           - name: CERTBOT_SUBSET
             value: {{ .Values.certbot.subset | quote }}
+          - name: CERTBOT_CERT_PER_HOST
+            value: {{ .Values.certbot.certPerHost | quote }}
         resources:
           requests:
             cpu: 50m

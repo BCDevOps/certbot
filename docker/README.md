@@ -10,17 +10,17 @@ To learn more about the **Common Services** available visit the [Common Services
 
 ## Table of Contents
 
-- [Summary](#summary)
-- [Environment Variables](#environment-variables)
-- [Quick Start](#quick-start)
-  - [Manual Run](#manual-run)
-  - [Cleanup](#cleanup)
-- [Entrust Usage](#entrust-usage)
-- [Tips](#tips)
-- [Appendix](#appendix)
-  - [References](#references)
-  - [Errata](#errata)
-- [License](#license)
+  - [Summary](#summary)
+  - [Environment Variables](#environment-variables)
+  - [Quick Start](#quick-start)
+    - [Manual Run](#manual-run)
+    - [Cleanup](#cleanup)
+  - [Entrust Usage](#entrust-usage)
+  - [Tips](#tips)
+  - [Appendix](#appendix)
+    - [References](#references)
+    - [Errata](#errata)
+  - [License](#license)
 
 ## Summary
 
@@ -29,7 +29,7 @@ To learn more about the **Common Services** available visit the [Common Services
 - Should only be executed on Openshift Container Platform
 - Creates an OpenShift `CronJob` which will run on a regular schedule for renewing TLS certificates
   - The `CronJob` will manage all `Route` objects annotated with the label `certbot-managed=true`
-  - One certificate will be issued/renewed for all the managed hosts/domains
+  - You have the option of a single certificate being issued/renewed for all the managed hosts/domains, or of an individual certificate being issued/renewed for each managed host/domain.
 - If a cert is created/renewed, patch the new certificate to the managed OpenShift routes
 
 ## Environment Variables
@@ -49,6 +49,7 @@ The Certbot container image supports an array of environment variables to config
 | `CERTBOT_RSA_KEY_SIZE` | `2048` | Key length for RSA keypair generation |
 | `CERTBOT_STAGING` | `false` | Use self-signed cert renewals. Must be `false` if using [Entrust](#entrust-usage)) |
 | `CERTBOT_SUBSET` | `true` | Allow Certbot to pass ACME challenge if at least one domain succeeds |
+| `CERTBOT_CERT_PER_HOST` | `false` | Manage an individual certificate per unique managed host (domain name), if true, otherwise, manage a single certificate for all managed hosts (domain names) |
 
 ## Quick Start
 
@@ -81,6 +82,7 @@ The following provides you a quick way to get Certbot set up and running as an O
     | `CERTBOT_SERVER` | `https://acme-v02.api.letsencrypt.org/directory` | ACME Certbot endpoint. For BC Gov SSL, see [Entrust](#entrust-usage). |
     | `CERTBOT_STAGING` | `false` | Use self-signed cert renewals. Must be `false` if using [Entrust](#entrust-usage)) |
     | `CERTBOT_SUBSET` | `true` | Allow domain validation to pass if a subset of them are valid |
+    | `CERTBOT_CERT_PER_HOST` | `false` | Manage an individual certificate per unique managed host (domain name), if true, otherwise, manage a single certificate for all managed hosts (domain names) |
     | `CRON_SCHEDULE` | `0 0 * * 1,4` | [Cronjob](https://crontab.guru) Schedule |
     | `CRON_SUSPEND` | `false` | Suspend cronjob |
     | `IMAGE_REGISTRY` | `docker.io` | Image Registry |
