@@ -134,6 +134,8 @@ objects:
                       value: "${CERTBOT_STAGING}"
                     - name: CERTBOT_SUBSET
                       value: "${CERTBOT_SUBSET}"
+                    - name: CERTBOT_CERT_PER_HOST
+                      value: "${CERTBOT_CERT_PER_HOST}"
                   resources:
                     requests:
                       cpu: 50m
@@ -187,6 +189,11 @@ parameters:
     description: Allow domain validation to pass if a subset of them are valid
     required: true
     value: "true"
+
+  - name: CERTBOT_CERT_PER_HOST
+    description: Manage an individual certificate per unique managed host (domain name), if true, otherwise, manage a single certificate for all managed hosts (domain names)
+    required: true
+    value: "false"
 
   - name: CRON_SCHEDULE
     description: Cronjob Schedule
