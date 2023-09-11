@@ -6,6 +6,8 @@
 
 Automatically update TLS Certificates on OpenShift Routes
 
+**Update: As of August 2023, Entrust (the only approved certificate provider for BC Gov production environments) has discontinued support for Certbot. Currently, Certbot cannot be used to manage your Entrust certificates.**
+
 To learn more about the **Common Services** available visit the [Common Services Showcase](https://bcgov.github.io/common-service-showcase/) page.
 
 ## Directory Structure
