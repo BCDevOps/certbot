@@ -1,4 +1,4 @@
-# Certbot [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE) [![Lifecycle:Stable](https://img.shields.io/badge/Lifecycle-Stable-97ca00)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
+# Certbot [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE) [![Lifecycle:Dormant](https://img.shields.io/badge/Lifecycle-Dormant-ff7f2a)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
 [![version](https://img.shields.io/docker/v/bcgovimages/certbot.svg?sort=semver)](https://hub.docker.com/r/bcgovimages/certbot)
 [![pulls](https://img.shields.io/docker/pulls/bcgovimages/certbot.svg)](https://hub.docker.com/r/bcgovimages/certbot)
