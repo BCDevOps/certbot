@@ -6,6 +6,8 @@
 
 Automatically update TLS Certificates on OpenShift Routes
 
+**Update: As of August 2023, Entrust (the only approved certificate provider for BC Gov production environments) has discontinued support for Certbot. Currently, Certbot cannot be used to manage your Entrust certificates.**
+
 To learn more about the **Common Services** available visit the [Common Services Showcase](https://bcgov.github.io/common-service-showcase/) page.
 
 ## Table of Contents
@@ -133,7 +135,11 @@ oc delete cronjob,pvc,rolebinding,sa -n $NAMESPACE -l app=certbot
 
 ## Entrust Usage
 
-Entrust is the only approved certificate provider for BC Gov production environments currently. There are a few extra steps required to request certificates from Entrust instead of LetsEncrypt.
+**Update: As of August 2023, BC Gov's security certificate supplier, Entrust, has discontinued support for Certbot. Currently, Certbot cannot be used to manage your Entrust certificates.**
+
+Entrust is the only approved certificate provider for BC Gov production environments currently.
+
+Where Entrust does support Certbot, there are a few extra steps required to request certificates from Entrust instead of LetsEncrypt.
 
 1. Start by creating the deployment config found in the [Quick Start](#quick-start) section
 

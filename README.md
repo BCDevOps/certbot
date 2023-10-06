@@ -1,10 +1,12 @@
-# Certbot [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE) [![Lifecycle:Stable](https://img.shields.io/badge/Lifecycle-Stable-97ca00)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
+# Certbot [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE) [![Lifecycle:Dormant](https://img.shields.io/badge/Lifecycle-Dormant-ff7f2a)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
 [![version](https://img.shields.io/docker/v/bcgovimages/certbot.svg?sort=semver)](https://hub.docker.com/r/bcgovimages/certbot)
 [![pulls](https://img.shields.io/docker/pulls/bcgovimages/certbot.svg)](https://hub.docker.com/r/bcgovimages/certbot)
 [![size](https://img.shields.io/docker/image-size/bcgovimages/certbot.svg)](https://hub.docker.com/r/bcgovimages/certbot)
 
 Automatically update TLS Certificates on OpenShift Routes
+
+**Update: As of August 2023, Entrust (the only approved certificate provider for BC Gov production environments) has discontinued support for Certbot. Currently, Certbot cannot be used to manage your Entrust certificates.**
 
 To learn more about the **Common Services** available visit the [Common Services Showcase](https://bcgov.github.io/common-service-showcase/) page.
 
