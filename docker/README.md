@@ -6,23 +6,25 @@
 
 Automatically update TLS Certificates on OpenShift Routes
 
-**Update: As of August 2023, Entrust (the only approved certificate provider for BC Gov production environments) has discontinued support for Certbot. Currently, Certbot cannot be used to manage your Entrust certificates.**
+_Update (August 2023) - Entrust Certificate Services has discontinued ACMEv1 protocol. Current users of BCDevOps Certbot will be unable to renew their certificates at this time if they are using OCIO Identity Management Services' Entrust Certificate Services._
+
+_Update (November 2023) - At this time, the underlying EFF Certbot project and Entrust Certificate Services both support the newer ACMEv2 protocol. However, BCDevOps Certbot currently only supports the older, deprecated, ACMEv1 protocol, and OCIO IMS has not enabled ACMEv2 protocol support at this time. Please consider contacting OCIO Identity Management Services to express your need for ACMEv2 and Certbot support._
 
 To learn more about the **Common Services** available visit the [Common Services Showcase](https://bcgov.github.io/common-service-showcase/) page.
 
 ## Table of Contents
 
-  - [Summary](#summary)
-  - [Environment Variables](#environment-variables)
-  - [Quick Start](#quick-start)
-    - [Manual Run](#manual-run)
-    - [Cleanup](#cleanup)
-  - [Entrust Usage](#entrust-usage)
-  - [Tips](#tips)
-  - [Appendix](#appendix)
-    - [References](#references)
-    - [Errata](#errata)
-  - [License](#license)
+- [Summary](#summary)
+- [Environment Variables](#environment-variables)
+- [Quick Start](#quick-start)
+  - [Manual Run](#manual-run)
+  - [Cleanup](#cleanup)
+- [Entrust Usage](#entrust-usage)
+- [Tips](#tips)
+- [Appendix](#appendix)
+  - [References](#references)
+  - [Errata](#errata)
+- [License](#license)
 
 ## Summary
 
